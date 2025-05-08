@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from 'react';
 import { toast } from 'sonner';
 import supabase from '@/lib/supabase';
@@ -227,12 +226,10 @@ export const FileProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const filePath = decodeURIComponent(sharePath);
       
       // Get the file metadata
-      const { data: fileData, error: fileError } = await supabase
+      const { data: fileData } = await supabase
         .storage
         .from('files')
         .getPublicUrl(filePath);
-      
-      if (fileError) throw fileError;
       
       // Get original file metadata from the shares table
       const { data: shareData, error: shareError } = await supabase

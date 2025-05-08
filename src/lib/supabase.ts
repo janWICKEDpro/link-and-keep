@@ -1,10 +1,11 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// These are public keys, it's safe to include them in the frontend code
-const supabaseUrl = 'https://your-supabase-url.supabase.co';
-const supabaseAnonKey = 'your-supabase-anon-key';
+// Replace these with your actual Supabase URL and anon key
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
+// Create Supabase client
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default supabase;
