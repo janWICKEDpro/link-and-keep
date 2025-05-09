@@ -13,9 +13,13 @@ const PublicRoute = ({
 }: PublicRouteProps) => {
   const { user, loading } = useAuth();
 
-  // If still loading, show nothing or a loading indicator
+  // If still loading, show a better loading animation
   if (loading) {
-    return <div className="flex h-screen w-full items-center justify-center">Loading...</div>;
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-gray-100">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-solid"></div>
+      </div>
+    );
   }
   
   // If authenticated, redirect to specified route

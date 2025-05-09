@@ -60,18 +60,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Clean up existing auth state
       cleanupAuthState();
       
-      // Attempt global sign out first
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-      }
+      // // Attempt global sign out first
+      // try {
+      //   await supabase.auth.signOut({ scope: 'global' });
+      // } catch (err) {
+      //   // Continue even if this fails
+      // }
       
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       
       toast.success('Signed in successfully');
-      navigate('/dashboard');
+       navigate('/dashboard');
     } catch (error: any) {
       toast.error(error.message || 'Failed to sign in');
       console.error('Error signing in:', error);
