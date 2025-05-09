@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from 'react';
 import { toast } from 'sonner';
 import supabase from '@/lib/supabase';
@@ -38,58 +37,112 @@ export const FileProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const fetchFiles = async () => {
-    if (!user) return;
+    if (!user) {
+      setFiles([]);
+      return;
+    }
     
     try {
       setLoading(true);
+      console.log("Fetching files for user:", user.id);
       
-      // First, check if the user's folder exists and create it if it doesn't
-      const { data: folderExists, error: folderError } = await supabase
+      try {
+        // First check if the 'files' bucket exists
+        const { data: bucketData, error: bucketError } = await supabase
+          .storage
+          .getBucket('files');
+          
+        if (bucketError) {
+          console.log("Bucket error:", bucketError);
+          if (bucketError.message.includes("does not exist")) {
+            toast.error("Storage is not properly configured");
+            setFiles([]);
+            setLoading(false);
+            return;
+          }
+        }
+        
+        console.log("Bucket exists:", bucketData);
+      } catch (bucketError) {
+        console.error("Error checking bucket:", bucketError);
+      }
+      
+      // Try to list files for this user
+      const { data: filesList, error: listError } = await supabase
         .storage
         .from('files')
         .list(user.id);
       
-      if (folderError && folderError.message !== 'The resource was not found') {
-        console.error('Error checking folder:', folderError);
+      if (listError) {
+        // If error is "not found", it likely means the user folder doesn't exist yet
+        console.log("List error:", listError);
+        if (listError.message.includes("not found")) {
+          console.log("User folder does not exist yet");
+          // This is fine for new users
+          setFiles([]);
+          setLoading(false);
+          return;
+        } else {
+          // Other errors should be shown to the user
+          toast.error(`Error loading files: ${listError.message}`);
+          setFiles([]);
+          setLoading(false);
+          return;
+        }
       }
       
-      // If folder doesn't exist or is empty, create it
-      if (!folderExists || folderExists.length === 0) {
-        console.log('No files found or folder does not exist');
+      // If no files, just return empty array
+      if (!filesList || filesList.length === 0) {
+        console.log("No files found for user");
         setFiles([]);
         setLoading(false);
         return;
       }
       
+      console.log("Files found:", filesList);
+      
       // Get the URLs for each file
       const filesWithUrls = await Promise.all(
-        folderExists.map(async (file) => {
+        filesList.map(async (file) => {
           const path = `${user.id}/${file.name}`;
-          const { data: urlData } = await supabase
-            .storage
-            .from('files')
-            .createSignedUrl(path, 60 * 60); // 1 hour expiry
+          try {
+            const { data: urlData, error: urlError } = await supabase
+              .storage
+              .from('files')
+              .createSignedUrl(path, 60 * 60); // 1 hour expiry
+              
+            if (urlError) {
+              console.error("URL creation error for file:", file.name, urlError);
+              return null;
+            }
 
-          return {
-            id: file.id,
-            name: file.name,
-            size: file.metadata?.size || 0,
-            type: file.metadata?.mimetype || 'application/octet-stream',
-            created_at: file.created_at,
-            path: path,
-            url: urlData?.signedUrl || '',
-            user_id: user.id,
-            metadata: file.metadata
-          } as FileItem;
+            return {
+              id: file.id,
+              name: file.name,
+              size: file.metadata?.size || 0,
+              type: file.metadata?.mimetype || 'application/octet-stream',
+              created_at: file.created_at,
+              path: path,
+              url: urlData?.signedUrl || '',
+              user_id: user.id,
+              metadata: file.metadata
+            } as FileItem;
+          } catch (error) {
+            console.error("Error processing file:", file.name, error);
+            return null;
+          }
         })
       );
 
+      // Filter out any null results from errors
+      const validFiles = filesWithUrls.filter(file => file !== null) as FileItem[];
+      
       // Apply search filter if present
       const filteredFiles = filter.search 
-        ? filesWithUrls.filter(file => 
+        ? validFiles.filter(file => 
             file.name.toLowerCase().includes(filter.search.toLowerCase())
           )
-        : filesWithUrls;
+        : validFiles;
 
       // Apply sorting
       const sortedFiles = [...filteredFiles].sort((a, b) => {
@@ -111,6 +164,7 @@ export const FileProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       });
 
+      console.log("Processed files:", sortedFiles.length);
       setFiles(sortedFiles);
     } catch (error: any) {
       toast.error(error.message || 'Failed to fetch files');

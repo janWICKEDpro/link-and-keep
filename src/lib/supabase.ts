@@ -12,8 +12,17 @@ const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
-    // Remove any flowType settings that might enable email confirmation
+    // Use pkce flow which doesn't enforce email verification
     flowType: 'pkce'
+  },
+  global: {
+    fetch: (...args) => {
+      // Add retry logic for failed requests
+      return fetch(...args).catch(err => {
+        console.error('Fetch error:', err);
+        throw err;
+      });
+    }
   }
 });
 

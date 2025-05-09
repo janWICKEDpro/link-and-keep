@@ -15,8 +15,11 @@ const Dashboard = () => {
   const { fetchFiles } = useFiles();
 
   useEffect(() => {
-    fetchFiles();
-  }, [fetchFiles]);
+    if (user) {
+      console.log("Dashboard mounted, fetching files for user:", user.id);
+      fetchFiles().catch(err => console.error("Error fetching files:", err));
+    }
+  }, [user, fetchFiles]);
 
   return (
     <div className="min-h-screen bg-slate-50">
