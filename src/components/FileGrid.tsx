@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 
 const FileCard = ({ file }: { file: FileItem }) => {
   const { toggleSelectFile, selectedFiles, downloadFile, shareFile } = useFiles();
@@ -67,7 +68,11 @@ const FileCard = ({ file }: { file: FileItem }) => {
     setCopying(true);
     const shareUrl = await shareFile(file.id);
     if (shareUrl) {
+      toast.success('Link copied to clipboard!');
       await navigator.clipboard.writeText(shareUrl);
+      setCopying(false);
+    }else { 
+      toast.error('Failed to copy link');
       setCopying(false);
     }
   };
@@ -112,15 +117,53 @@ const FileCard = ({ file }: { file: FileItem }) => {
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
             <span className="sr-only">Download</span>
           </Button>
-          <Button
+            <Button
             variant="ghost"
             size="icon"
             className="h-8 w-8 bg-white/90 hover:bg-white text-gray-700"
             onClick={handleShareClick}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
+            disabled={copying}
+            >
+            {copying ? (
+              <svg
+              className="animate-spin h-4 w-4 text-gray-700"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              ></path>
+              </svg>
+            ) : (
+              <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              >
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+              <polyline points="16 6 12 2 8 6" />
+              <line x1="12" x2="12" y1="2" y2="15" />
+              </svg>
+            )}
             <span className="sr-only">Share</span>
-          </Button>
+            </Button>
         </div>
       </div>
     </Card>

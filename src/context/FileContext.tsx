@@ -37,6 +37,7 @@ export const FileProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const fetchFiles = async () => {
+
     if (!user) {
       setFiles([]);
       return;

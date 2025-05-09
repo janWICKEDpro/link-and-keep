@@ -19,7 +19,7 @@ const Dashboard = () => {
       console.log("Dashboard mounted, fetching files for user:", user.id);
       fetchFiles().catch(err => console.error("Error fetching files:", err));
     }
-  }, [user, fetchFiles]);
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-slate-50">
