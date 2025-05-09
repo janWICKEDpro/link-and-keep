@@ -82,7 +82,7 @@ const Landing = () => {
       <footer className="bg-white border-t py-10">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-600 mb-4 md:mb-0">© 2023 Link & Keep. All rights reserved.</p>
+            <p className="text-gray-600 mb-4 md:mb-0">© 2025 Link & Keep. All rights reserved.</p>
             <div className="flex space-x-6">
               <a href="#" className="text-gray-600 hover:text-brand-600">Terms</a>
               <a href="#" className="text-gray-600 hover:text-brand-600">Privacy</a>
