@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState } from 'react';
 import { toast } from 'sonner';
 import supabase from '@/lib/supabase';
@@ -42,19 +43,27 @@ export const FileProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       
-      // Get files from Supabase storage
-      const { data, error } = await supabase
+      // First, check if the user's folder exists and create it if it doesn't
+      const { data: folderExists, error: folderError } = await supabase
         .storage
         .from('files')
-        .list(user.id, {
-          sortBy: { column: filter.sort.field, order: filter.sort.direction }
-        });
-
-      if (error) throw error;
-
+        .list(user.id);
+      
+      if (folderError && folderError.message !== 'The resource was not found') {
+        console.error('Error checking folder:', folderError);
+      }
+      
+      // If folder doesn't exist or is empty, create it
+      if (!folderExists || folderExists.length === 0) {
+        console.log('No files found or folder does not exist');
+        setFiles([]);
+        setLoading(false);
+        return;
+      }
+      
       // Get the URLs for each file
       const filesWithUrls = await Promise.all(
-        data.map(async (file) => {
+        folderExists.map(async (file) => {
           const path = `${user.id}/${file.name}`;
           const { data: urlData } = await supabase
             .storage

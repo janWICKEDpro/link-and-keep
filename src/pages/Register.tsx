@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Loader2 } from 'lucide-react';
 
 const Register = () => {
   const [email, setEmail] = useState('');
@@ -93,7 +94,14 @@ const Register = () => {
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full bg-brand-600 hover:bg-brand-700" disabled={loading}>
-              {loading ? 'Creating account...' : 'Create account & sign in'}
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating account...
+                </>
+              ) : (
+                'Create account & sign in'
+              )}
             </Button>
             <div className="text-center text-sm">
               Already have an account?{' '}
