@@ -12,6 +12,8 @@ const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+    // Remove any flowType settings that might enable email confirmation
+    flowType: 'pkce'
   }
 });
 

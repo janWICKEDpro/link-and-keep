@@ -80,7 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Sign up with email and password
+  // Sign up with email and password - updated to not require email verification
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
       setLoading(true);
@@ -88,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Clean up existing auth state
       cleanupAuthState();
       
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -100,7 +100,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) throw error;
       
-      toast.success('Account created successfully! Please check your email to confirm your account.');
+      if (data.user) {
+        toast.success('Account created successfully! Signing you in...');
+        // Auto-sign in after successful registration
+        await signIn(email, password);
+      } else {
+        toast.error('Something went wrong during signup');
+      }
     } catch (error: any) {
       toast.error(error.message || 'Failed to sign up');
       console.error('Error signing up:', error);

@@ -32,6 +32,7 @@ const Register = () => {
     e.preventDefault();
     if (validatePassword()) {
       await signUp(email, password, fullName);
+      // No need to tell users to check email, since we're auto-signing them in
     }
   };
 
@@ -92,7 +93,7 @@ const Register = () => {
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full bg-brand-600 hover:bg-brand-700" disabled={loading}>
-              {loading ? 'Creating account...' : 'Create account'}
+              {loading ? 'Creating account...' : 'Create account & sign in'}
             </Button>
             <div className="text-center text-sm">
               Already have an account?{' '}
